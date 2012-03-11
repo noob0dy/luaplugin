@@ -14,6 +14,12 @@ local tm_data = Proto("TM.data", "TM Data - tm2009 data")		--define protocol
         [7] = "rnsap",
         [8] = "nbap"
     }
+	--
+    local vs_version= {
+        [6] = "ranap",
+        [7] = "rnsap",
+        [8] = "nbap"
+    }
     local vs_commands= {
         [2] = "TM packet",
         [3] = "mtp3",
@@ -21,19 +27,38 @@ local tm_data = Proto("TM.data", "TM Data - tm2009 data")		--define protocol
         [5] = "h248",
         [6] = "ranap",
         [7] = "rnsap",
-        [8] = "nbap"
+        [8] = "nbap",
+        [145] = "first command"		--ProtoField对象f_command对应的命令
     }
 
     --创建几个ProtoField对象，就是主界面中部Packet Details窗格中能显示的那些属性
-    local f_packet_header = ProtoField.bytes("TM.packetheader","Packet Header","hello world")
-    --local f_ver = ProtoField.bytes("TM.version","Protocol Version",base.HEX)
-    local f_ver = ProtoField.uint8("TM.version","Protocol Version",base.HEX,{ [1] = "incoming", [64] = "outgoing",[6720] = "Version number"})
-    local f_text = ProtoField.string("TM.text","Text")
-    local f_command = ProtoField.uint8("TM.protocol","Command",base.DEC,vs_commands)
-    local f_packet_sequence = ProtoField.uint8("TM.protocol","Packet Sequence",base.DEC)
-    local f_qq_num = ProtoField.uint8("TM.qqnum","QQ Number",base.DEC)
-    local f_pro_data = ProtoField.bytes("TM.data","TM Data",base.DEC)
-    local f_packet_tailer = ProtoField.bytes("TM.packettailer","Packet Tailer",base.DEC)
+    local f_packet_header = ProtoField.bytes("tm.pkt.header","Packet Header","pkt header")
+    --local f_packet_header = ProtoField.uint8("tm.packetheader","Packet Header",base.DEC)
+    --local f_packet_header = ProtoField.uint8("tm.packetheader","Packet Header",base.HEX)
+
+    local f_ver = ProtoField.bytes("tm.version","Protocol Version",base.HEX)
+    --local f_ver = ProtoField.uint8("tm.version","Protocol Version",base.HEX,vs_version)
+    --local f_ver = ProtoField.uint8("tm.version","Protocol Version",base.HEX)
+
+    local f_text = ProtoField.string("tm.text","Text")
+
+    --local f_command = ProtoField.bytes("tm.command","Command",base.HEX)
+    local f_command = ProtoField.uint8("tm.command","Command",base.HEX,vs_commands)
+
+    local f_packet_sequence = ProtoField.uint8("tm.pkt.sequence","Packet Sequence",base.DEC)
+
+    local f_qq_num = ProtoField.uint8("tm.qqnum","QQ Number",base.DEC)
+
+    local f_pro_data = ProtoField.bytes("tm.data","TM Data",base.DEC)
+
+    local f_data_11bytes = ProtoField.bytes("tm.data","Unknow Filling","static 15 bytes")
+
+    local f_data_key = ProtoField.bytes("tm.data","Key of TEA","16 bytes")
+
+    local f_data_real = ProtoField.bytes("tm.data","Encrypted Data","some bytes")
+
+    local f_packet_tailer = ProtoField.bytes("tm.pkt.tailer","Packet Tailer","pkt tailer")
+
 
         --把ProtoField对象加到Proto对象上
         tm_protocol.fields = {
@@ -46,6 +71,9 @@ local tm_data = Proto("TM.data", "TM Data - tm2009 data")		--define protocol
 		}
         tm_data.fields = {
 			f_pro_data,
+			f_data_11bytes,
+			f_data_real,
+			f_data_key, 
 			f_packet_tailer 
 		}
 
@@ -90,6 +118,15 @@ local tm_data = Proto("TM.data", "TM Data - tm2009 data")		--define protocol
 
         local k = root:add(tm_data,buf(11,buf:len()-12))
 		k:add(f_pro_data, buf(11,buf:len()-12))
+
+		--if xxx
+		--
+		k:add(f_data_11bytes, buf(11, 11))
+		--
+		k:add(f_data_key, buf(22, 16))
+
+		k:add(f_data_real, buf(38, 48))
+
         k:add(f_packet_tailer,buf(buf:len()-1,1))
 
 
