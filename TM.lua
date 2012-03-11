@@ -38,7 +38,6 @@ local tm_data = Proto("TM.data", "TM Data - tm2009 data")		--define protocol
 
     local f_ver = ProtoField.bytes("tm.version","Protocol Version",base.HEX)
     --local f_ver = ProtoField.uint8("tm.version","Protocol Version",base.HEX,vs_version)
-    --local f_ver = ProtoField.uint8("tm.version","Protocol Version",base.HEX)
 
     local f_text = ProtoField.string("tm.text","Text")
 
