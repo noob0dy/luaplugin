@@ -49,8 +49,11 @@ local tm_data = Proto("TM.data", "TM Data - tm2009 data")		--define protocol
     local f_qq_num = ProtoField.uint8("tm.qqnum","QQ Number",base.DEC)
 
     local f_pro_data = ProtoField.bytes("tm.data","TM Data",base.DEC)
-
+	
+	-----------
     local f_data_11bytes = ProtoField.bytes("tm.data","Unknow Filling","static 15 bytes")
+    local f_data_3bytes = ProtoField.bytes("tm.data","Unknow Filling","static 3 bytes")
+	------------
 
     local f_data_key = ProtoField.bytes("tm.data","Key of TEA","16 bytes")
 
@@ -71,6 +74,7 @@ local tm_data = Proto("TM.data", "TM Data - tm2009 data")		--define protocol
         tm_data.fields = {
 			f_pro_data,
 			f_data_11bytes,
+			f_data_3bytes,
 			f_data_real,
 			f_data_key, 
 			f_packet_tailer 
@@ -118,13 +122,17 @@ local tm_data = Proto("TM.data", "TM Data - tm2009 data")		--define protocol
         local k = root:add(tm_data,buf(11,buf:len()-12))
 		k:add(f_pro_data, buf(11,buf:len()-12))
 
-		--if xxx
-		--
-		k:add(f_data_11bytes, buf(11, 11))
-		--
-		k:add(f_data_key, buf(22, 16))
-
-		k:add(f_data_real, buf(38, 48))
+		local data_id = buf(11, 1):uint()
+		if data_id == 2 then
+			k:add(f_data_11bytes, buf(11, 11))
+			k:add(f_data_key, buf(22, 16))
+			k:add(f_data_real, buf(38, 48))
+			else if data_id == 0 then
+					k:add(f_data_3bytes, buf(11, 3))
+					k:add(f_data_real, buf(14, 88))
+				end
+		end
+					
 
         k:add(f_packet_tailer,buf(buf:len()-1,1))
 
