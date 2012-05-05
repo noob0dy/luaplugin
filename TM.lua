@@ -126,10 +126,12 @@ local tm_data = Proto("TM.data", "TM Data - tm2009 data")		--define protocol
 		if data_id == 2 then
 			k:add(f_data_11bytes, buf(11, 11))
 			k:add(f_data_key, buf(22, 16))
-			k:add(f_data_real, buf(38, 48))
+			--k:add(f_data_real, buf(38, 48))
+			k:add(f_data_real, buf(38, (buf:len()-39)))
 			else if data_id == 0 then
 					k:add(f_data_3bytes, buf(11, 3))
-					k:add(f_data_real, buf(14, 88))
+					k:add(f_data_real, buf(14, (buf:len()-15)))
+					--k:add(f_data_real, buf(14, 88))
 				end
 		end
 					
